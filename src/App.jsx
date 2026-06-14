@@ -7,8 +7,7 @@ import FormParcela from './components/FormParcela';
 import VistaParcela from './components/VistaParcela';
 
 export default function App() {
-  // Navegación simple por estado: 'lista' | 'nueva' | 'parcela'
-  const [vista, setVista] = useState('lista');
+  const [vista, setVista] = useState('lista'); // 'lista' | 'nueva' | 'parcela'
   const [parcelas, setParcelas] = useState([]);
   const [parcelaActiva, setParcelaActiva] = useState(null);
   const [arboles, setArboles] = useState([]);
@@ -16,9 +15,9 @@ export default function App() {
   const [online, setOnline] = useState(navigator.onLine);
   const [pendientes, setPendientes] = useState(0);
   const [msgSync, setMsgSync] = useState('');
+  const [syncOk, setSyncOk] = useState(true);
   const [sincronizando, setSincronizando] = useState(false);
 
-  // ── Cargar datos locales ──────────────────────────────────
   const refrescar = useCallback(async () => {
     setParcelas(await listarParcelas());
     const { parcelas: pp, arboles: aa } = await listarPendientes();
@@ -31,28 +30,27 @@ export default function App() {
     setVista('parcela');
   }, []);
 
-  // ── Sincronización (manual y automática) ──────────────────
   const ejecutarSync = useCallback(async () => {
     setSincronizando(true);
+    setSyncOk(true);
     setMsgSync('Sincronizando…');
     try {
       const r = await sincronizar();
+      setSyncOk(r.ok);
       setMsgSync(r.mensaje);
     } catch (e) {
+      setSyncOk(false);
       setMsgSync('Error de sincronización: ' + e.message);
     } finally {
       setSincronizando(false);
       refrescar();
-      setTimeout(() => setMsgSync(''), 4000);
+      setTimeout(() => setMsgSync(''), 5000);
     }
   }, [refrescar]);
 
   useEffect(() => {
     refrescar();
-    const alConectar = () => {
-      setOnline(true);
-      ejecutarSync(); // al recuperar señal, sube lo pendiente solo
-    };
+    const alConectar = () => { setOnline(true); ejecutarSync(); };
     const alDesconectar = () => setOnline(false);
     window.addEventListener('online', alConectar);
     window.addEventListener('offline', alDesconectar);
@@ -63,16 +61,16 @@ export default function App() {
   }, [ejecutarSync, refrescar]);
 
   return (
-    <div className="min-h-screen bg-zinc-100 text-slate-900">
-      {/* Encabezado corporativo */}
-      <header className="bg-zinc-900 text-white px-4 pt-[env(safe-area-inset-top)]">
-        <div className="flex items-center justify-between py-3">
+    <div className="min-h-screen bg-zinc-50 text-zinc-900">
+      {/* Header */}
+      <header className="sticky top-0 z-10 bg-zinc-900 px-4 pt-[env(safe-area-inset-top)] text-white">
+        <div className="flex items-center justify-between py-3.5">
           <button
             onClick={() => { setVista('lista'); refrescar(); }}
             className="flex items-center gap-2"
           >
-            <span className="text-2xl">🌲</span>
-            <span className="text-xl font-bold tracking-tight">
+            <span className="text-xl">🌲</span>
+            <span className="text-lg font-bold tracking-tight">
               Stoc<span className="text-emerald-400">Bioma</span>
             </span>
           </button>
@@ -80,14 +78,20 @@ export default function App() {
         </div>
       </header>
 
-      {/* Aviso de sincronización */}
+      {/* Banner de sincronización: tarjeta sutil, color según éxito/error */}
       {msgSync && (
-        <div className="bg-emerald-700 text-white text-center text-sm font-medium py-2 px-4">
-          {msgSync}
+        <div className="px-4 pt-3">
+          <div
+            className={`mx-auto max-w-xl rounded-2xl px-4 py-3 text-sm font-medium ${
+              syncOk ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-700'
+            }`}
+          >
+            {msgSync}
+          </div>
         </div>
       )}
 
-      <main className="max-w-xl mx-auto p-4 pb-28">
+      <main className="mx-auto max-w-xl p-4 pb-32">
         {vista === 'lista' && (
           <ListaParcelas
             parcelas={parcelas}
@@ -116,23 +120,21 @@ export default function App() {
         )}
       </main>
 
-      {/* Botón fijo de sincronización manual */}
-      <footer className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur border-t border-zinc-200 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-        <div className="max-w-xl mx-auto">
+      {/* Botón flotante de sincronización */}
+      <footer className="fixed inset-x-0 bottom-0 border-t border-zinc-200 bg-white/80 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-lg">
+        <div className="mx-auto max-w-xl">
           <button
             onClick={ejecutarSync}
             disabled={sincronizando}
-            className={`w-full py-4 rounded-xl text-lg font-bold transition-colors ${
-              pendientes > 0
-                ? 'bg-emerald-600 text-white active:bg-emerald-700'
-                : 'bg-zinc-200 text-zinc-500'
-            } disabled:opacity-60`}
+            className={`w-full rounded-2xl py-4 text-base font-semibold transition active:scale-[0.98] disabled:opacity-50 ${
+              pendientes > 0 ? 'bg-emerald-600 text-white' : 'bg-zinc-100 text-zinc-400'
+            }`}
           >
             {sincronizando
               ? 'Sincronizando…'
               : pendientes > 0
-                ? `⬆ Sincronizar ${pendientes} pendiente(s)`
-                : '✓ Datos sincronizados'}
+                ? `Sincronizar ${pendientes} pendiente(s)`
+                : 'Datos sincronizados'}
           </button>
         </div>
       </footer>

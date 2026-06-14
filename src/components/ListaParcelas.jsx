@@ -1,22 +1,20 @@
 export default function ListaParcelas({ parcelas, onAbrir, onNueva }) {
   return (
     <section>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold text-slate-800">Parcelas de muestreo</h1>
-      </div>
+      <h1 className="mb-5 text-3xl font-bold tracking-tight text-zinc-900">Parcelas</h1>
 
       <button
         onClick={onNueva}
-        className="w-full mb-4 py-4 rounded-xl bg-emerald-600 text-white text-lg font-bold active:bg-emerald-700"
+        className="mb-5 w-full rounded-2xl bg-zinc-900 py-4 text-base font-semibold text-white transition active:scale-[0.98]"
       >
         ＋ Nueva parcela
       </button>
 
       {parcelas.length === 0 && (
-        <div className="bg-white rounded-xl border border-zinc-200 p-6 text-center text-slate-600">
-          <p className="text-4xl mb-2">🌲</p>
-          <p className="font-semibold">Todavía no hay parcelas.</p>
-          <p className="text-sm mt-1">
+        <div className="rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-zinc-100">
+          <p className="mb-3 text-4xl">🌲</p>
+          <p className="font-semibold text-zinc-900">Todavía no hay parcelas</p>
+          <p className="mt-1.5 text-sm leading-relaxed text-zinc-500">
             Creá la primera con el botón de arriba. Todo se guarda en el
             teléfono, con o sin señal.
           </p>
@@ -28,23 +26,23 @@ export default function ListaParcelas({ parcelas, onAbrir, onNueva }) {
           <li key={p.client_id}>
             <button
               onClick={() => onAbrir(p)}
-              className="w-full text-left bg-white rounded-xl border border-zinc-200 p-4 active:bg-zinc-50"
+              className="w-full rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-zinc-100 transition active:scale-[0.99]"
             >
               <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-slate-800">{p.nombre}</span>
+                <span className="text-lg font-bold tracking-tight text-zinc-900">{p.nombre}</span>
                 <span
-                  className={`text-xs font-bold px-2 py-1 rounded-full ${
-                    p.synced ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                  className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                    p.synced ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
                   }`}
                 >
                   {p.synced ? 'Sincronizada' : 'Pendiente'}
                 </span>
               </div>
               {p.descripcion && (
-                <p className="text-sm text-slate-600 mt-1">{p.descripcion}</p>
+                <p className="mt-1 text-sm text-zinc-500">{p.descripcion}</p>
               )}
               {p.latitud != null && (
-                <p className="text-xs text-slate-500 mt-1 font-mono">
+                <p className="mt-1.5 font-mono text-xs text-zinc-400">
                   {p.latitud.toFixed(5)}, {p.longitud.toFixed(5)}
                 </p>
               )}

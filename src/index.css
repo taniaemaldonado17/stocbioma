@@ -1,21 +1,33 @@
+/* CSS de Leaflet (entra al precache del service worker) */
+@import 'leaflet/dist/leaflet.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Estilos del mapa Leaflet (importados acá para que entren al precache del SW) */
-@import 'leaflet/dist/leaflet.css';
+/* Tipografía del sistema: el San Francisco de iOS da el look premium */
+html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent; /* sin flash gris al tocar */
+}
 
-/* Marcadores de árbol dibujados con CSS (funcionan offline, sin imágenes) */
+body {
+  background: #fafafa; /* zinc-50, evita franjas blancas al hacer scroll */
+}
+
+/* Marcadores de árbol (Leaflet divIcon, funcionan offline) */
 .pin-arbol {
   display: block;
   width: 18px;
   height: 18px;
   border-radius: 9999px;
   border: 3px solid #ffffff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
 }
 
-/* Inputs grandes y de alto contraste para uso bajo el sol */
+/* 16px evita el zoom automático de iOS al enfocar un campo */
 input, select, textarea {
-  font-size: 16px; /* evita el zoom automático de iOS al enfocar */
+  font-size: 16px;
 }

@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react';
 import { guardarParcela } from '../lib/db';
 import { obtenerPosicion } from '../lib/utils';
 
+const inputBase =
+  'mt-1.5 w-full rounded-xl bg-zinc-100/70 px-4 py-3 text-zinc-900 ' +
+  'placeholder:text-zinc-400 transition focus:bg-white ' +
+  'focus:ring-2 focus:ring-zinc-900 focus:outline-none';
+const labelBase = 'text-xs font-medium text-zinc-500';
+
 export default function FormParcela({ onGuardada, onCancelar }) {
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -40,54 +46,59 @@ export default function FormParcela({ onGuardada, onCancelar }) {
   };
 
   return (
-    <section className="bg-white rounded-xl border border-zinc-200 p-4">
-      <h1 className="text-2xl font-bold text-slate-800 mb-4">Nueva parcela</h1>
+    <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-zinc-100">
+      <h1 className="mb-5 text-2xl font-bold tracking-tight text-zinc-900">Nueva parcela</h1>
 
-      <label className="block mb-4">
-        <span className="font-semibold text-slate-700">Nombre *</span>
+      <label className="mb-4 block">
+        <span className={labelBase}>Nombre *</span>
         <input
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
           placeholder="Ej: P-01 Lote Norte"
-          className="mt-1 w-full rounded-lg border-2 border-zinc-300 p-3 focus:border-emerald-600 outline-none"
+          className={inputBase}
         />
       </label>
 
-      <label className="block mb-4">
-        <span className="font-semibold text-slate-700">Descripción</span>
+      <label className="mb-4 block">
+        <span className={labelBase}>Descripción</span>
         <textarea
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
           rows={2}
           placeholder="Tipo de bosque, acceso, responsable…"
-          className="mt-1 w-full rounded-lg border-2 border-zinc-300 p-3 focus:border-emerald-600 outline-none"
+          className={`${inputBase} resize-none`}
         />
       </label>
 
-      <div className="mb-6 bg-zinc-100 rounded-lg p-3">
+      <div className="mb-6 rounded-2xl bg-zinc-50 p-4">
         <div className="flex items-center justify-between">
-          <span className="font-semibold text-slate-700">📍 Centro de parcela</span>
-          <button onClick={capturarGps} className="text-emerald-700 font-bold text-sm">
+          <span className="flex items-center gap-1.5 text-sm font-semibold text-zinc-700">
+            <span className="text-rose-500">📍</span> Centro de parcela
+          </span>
+          <button
+            onClick={capturarGps}
+            className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-zinc-600 shadow-sm transition active:scale-95"
+          >
             Recapturar
           </button>
         </div>
-        <p className="font-mono text-sm text-slate-800 mt-1">
+        <p className="mt-2 font-mono text-sm text-zinc-900">
           {gps ? `${gps.latitud.toFixed(6)}, ${gps.longitud.toFixed(6)}` : '—'}
         </p>
-        <p className="text-xs text-slate-500">{gpsEstado}</p>
+        <p className="text-xs text-zinc-400">{gpsEstado}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={onCancelar}
-          className="py-4 rounded-xl bg-zinc-200 text-slate-700 font-bold active:bg-zinc-300"
+          className="rounded-2xl bg-zinc-100 py-3.5 text-sm font-semibold text-zinc-600 transition active:scale-[0.98]"
         >
           Cancelar
         </button>
         <button
           onClick={guardar}
           disabled={guardando}
-          className="py-4 rounded-xl bg-emerald-600 text-white font-bold active:bg-emerald-700 disabled:opacity-60"
+          className="rounded-2xl bg-zinc-900 py-3.5 text-sm font-semibold text-white transition active:scale-[0.98] disabled:opacity-50"
         >
           Guardar parcela
         </button>
