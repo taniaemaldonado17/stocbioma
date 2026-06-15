@@ -36,10 +36,14 @@ create table if not exists public.arboles (
   dc_m                numeric(6,2),   -- Diámetro de Copa (m)
 
   -- Atributos cualitativos con valores controlados
+  tipo_inventario      text check (tipo_inventario in ('forestal','urbano')),
   estado_fitosanitario text check (estado_fitosanitario in ('Sano','Enfermo','Plaga','Muerto en pie')),
   riesgo               text check (riesgo in ('Bajo','Medio','Alto')),
 
   notas               text,
+  foto_arbol_entero   text,
+  foto_hoja           text,
+  foto_corteza        text,
 
   -- Georreferenciación automática (double precision es el tipo
   -- correcto para coordenadas WGS84 de navigator.geolocation)

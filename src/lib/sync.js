@@ -5,7 +5,7 @@
 // Orden importante: primero parcelas, después árboles (FK).
 // ============================================================
 
-import { supabase } from './supabaseClient';
+import { supabase, supabaseConfigMessage } from './supabaseClient';
 import { listarPendientes, marcarSincronizados } from './db';
 
 // Quita campos puramente locales antes de subir a Postgres
@@ -16,9 +16,28 @@ function limpiarArbol({ synced, ...a }) {
   return a;
 }
 
+async function upsertArbolesConFallback(registros) {
+  const payload = registros.map(limpiarArbol);
+  const { error } = await supabase.from('arboles').upsert(payload, { onConflict: 'client_id' });
+
+  if (!error) return { ok: true };
+
+  const mensaje = error.message || '';
+  if (mensaje.includes('column') && mensaje.includes('does not exist')) {
+    const { error: errorFallback } = await supabase.from('arboles').upsert(
+      payload.map(({ foto_arbol_entero, foto_hoja, foto_corteza, tipo_inventario, ...rest }) => rest),
+      { onConflict: 'client_id' }
+    );
+    if (errorFallback) throw errorFallback;
+    return { ok: true, fallback: true };
+  }
+
+  throw error;
+}
+
 export async function sincronizar() {
   if (!supabase) {
-    return { ok: false, mensaje: 'Supabase no está configurado (.env.local)' };
+    return { ok: false, mensaje: supabaseConfigMessage || 'Supabase no está configurado' };
   }
   if (!navigator.onLine) {
     return { ok: false, mensaje: 'Sin conexión: los datos siguen guardados en el teléfono' };
@@ -47,10 +66,7 @@ export async function sincronizar() {
   // 2) Árboles en lote
   if (arboles.length > 0) {
     try {
-      const { error } = await supabase
-        .from('arboles')
-        .upsert(arboles.map(limpiarArbol), { onConflict: 'client_id' });
-      if (error) throw error;
+      await upsertArbolesConFallback(arboles);
       await marcarSincronizados('arboles', arboles);
     } catch (error) {
       console.error('Error subiendo árboles', error);

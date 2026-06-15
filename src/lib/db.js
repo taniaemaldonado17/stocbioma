@@ -7,7 +7,7 @@
 // ============================================================
 
 const DB_NAME = 'stocbioma';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 function abrirDB() {
   return new Promise((resolve, reject) => {

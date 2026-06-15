@@ -126,7 +126,7 @@ export default function VistaParcela({ parcela, arboles, onArbolGuardado, onVolv
                       #{i + 1} · {a.especie || 'Sin especie'}
                     </p>
                     <p className="mt-0.5 text-xs text-zinc-400">
-                      DAP {a.dap_cm ?? '—'} cm · HT {a.ht_m ?? '—'} m · {a.estado_fitosanitario}
+                      {a.tipo_inventario === 'urbano' ? 'Urbano' : 'Forestal'} · DAP {a.dap_cm ?? '—'} cm · HT {a.ht_m ?? '—'} m · {a.estado_fitosanitario}
                     </p>
                   </div>
                   <span

@@ -13,4 +13,8 @@ const key = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim();
 
 // Si faltan credenciales la app sigue funcionando en modo 100% local
 // (útil para probar en campo antes de configurar el backend).
-export const supabase = url && key ? createClient(url, key) : null;
+export const supabaseConfigOk = Boolean(url && key);
+export const supabaseConfigMessage = supabaseConfigOk
+  ? ''
+  : 'Faltan VITE_SUPABASE_URL y/o VITE_SUPABASE_ANON_KEY. Agregalas en Vercel y redeployá.';
+export const supabase = supabaseConfigOk ? createClient(url, key) : null;
