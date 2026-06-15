@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { guardarParcela } from '../lib/db';
-import { obtenerPosicion } from '../lib/utils';
+import { crearClientId, obtenerPosicion } from '../lib/utils';
 
 const inputBase =
   'mt-1.5 w-full rounded-xl bg-zinc-100/70 px-4 py-3 text-zinc-900 ' +
@@ -34,7 +34,7 @@ export default function FormParcela({ onGuardada, onCancelar }) {
     setGuardando(true);
     try {
       const parcela = {
-        client_id: crypto.randomUUID(),
+        client_id: crearClientId(),
         nombre: nombre.trim(),
         descripcion: descripcion.trim() || null,
         latitud: gps?.latitud ?? null,

@@ -1,3 +1,11 @@
+// ── ID robusto para navegadores viejos o celulares ─────────
+export function crearClientId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}-${Math.random().toString(16).slice(2)}`;
+}
+
 // ── GPS: navigator.geolocation envuelto en una Promise ──────
 export function obtenerPosicion() {
   return new Promise((resolve, reject) => {

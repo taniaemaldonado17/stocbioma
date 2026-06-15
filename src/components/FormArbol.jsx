@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { guardarArbol } from '../lib/db';
 import { supabase } from '../lib/supabaseClient';
-import { obtenerPosicion } from '../lib/utils';
+import { crearClientId, obtenerPosicion } from '../lib/utils';
 
 const ESTADOS = ['Sano', 'Enfermo', 'Plaga', 'Muerto en pie'];
 const RIESGOS = ['Bajo', 'Medio', 'Alto'];
@@ -69,6 +69,7 @@ export default function FormArbol({ parcela, numeroSiguiente, onGuardado }) {
   const [gps, setGps] = useState(null);
   const [gpsEstado, setGpsEstado] = useState('Buscando señal GPS…');
   const [guardando, setGuardando] = useState(false);
+  const [fotoEstado, setFotoEstado] = useState('');
 
   const set = (campo) => (valor) => setF((prev) => ({ ...prev, [campo]: valor }));
 
@@ -79,8 +80,9 @@ export default function FormArbol({ parcela, numeroSiguiente, onGuardado }) {
       const dataUrl = await leerArchivoComoDataUrl(file);
       setFotos((prev) => ({ ...prev, [tipo]: dataUrl }));
       setFotosArchivos((prev) => ({ ...prev, [tipo]: file }));
+      setFotoEstado('');
     } catch (error) {
-      alert(error.message);
+      setFotoEstado(error.message || 'No se pudo leer la imagen');
     }
   };
 
@@ -105,7 +107,7 @@ export default function FormArbol({ parcela, numeroSiguiente, onGuardado }) {
     if (f.dap_cm === '') return alert('El DAP es obligatorio.');
     setGuardando(true);
 
-    const clientId = crypto.randomUUID();
+    const clientId = crearClientId();
     const urls = {};
 
     for (const tipo of ['entero', 'hoja', 'corteza']) {
@@ -133,6 +135,7 @@ export default function FormArbol({ parcela, numeroSiguiente, onGuardado }) {
 
           if (error) {
             console.warn(`No se pudo subir ${tipo} a storage:`, error.message);
+            setFotoEstado('La foto se guardó como vista previa local; la subida a Supabase falló.');
           }
         }
       } catch (error) {
@@ -158,8 +161,8 @@ export default function FormArbol({ parcela, numeroSiguiente, onGuardado }) {
         foto_arbol_entero: urls.entero || null,
         foto_hoja: urls.hoja || null,
         foto_corteza: urls.corteza || null,
-        latitud: gps?.latitud ?? null,
-        longitud: gps?.longitud ?? null,
+        latitud: gps?.latitud ?? parcela?.latitud ?? null,
+        longitud: gps?.longitud ?? parcela?.longitud ?? null,
         precision_m: gps?.precision_m ?? null,
         medido_en: new Date().toISOString(),
         synced: false
@@ -270,9 +273,10 @@ export default function FormArbol({ parcela, numeroSiguiente, onGuardado }) {
         <FotoInput etiqueta="Foto hoja" valor={fotos.hoja} onChange={subirFoto('hoja')} />
         <FotoInput etiqueta="Foto corteza" valor={fotos.corteza} onChange={subirFoto('corteza')} />
       </div>
-      <p className="mb-4 text-xs text-zinc-400">
+      <p className="mb-2 text-xs text-zinc-400">
         Si la foto no se sube a Supabase Storage, se conserva como vista previa local para que no se rompa el registro.
       </p>
+      {fotoEstado && <p className="mb-4 text-xs font-medium text-amber-600">{fotoEstado}</p>}
 
       {/* Notas */}
       <label className="mb-6 block">

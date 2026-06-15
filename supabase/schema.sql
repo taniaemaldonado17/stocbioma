@@ -47,8 +47,8 @@ create table if not exists public.arboles (
 
   -- Georreferenciación automática (double precision es el tipo
   -- correcto para coordenadas WGS84 de navigator.geolocation)
-  latitud             double precision not null,
-  longitud            double precision not null,
+  latitud             double precision,
+  longitud            double precision,
   precision_m         numeric(8,2),   -- precisión reportada por el GPS (metros)
 
   medido_en           timestamptz,    -- momento de la medición en campo
