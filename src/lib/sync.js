@@ -16,18 +16,38 @@ function limpiarArbol({ synced, ...a }) {
   return a;
 }
 
+function debeHacerFallback(error) {
+  const mensaje = error?.message || '';
+  return mensaje.includes('column') && (
+    mensaje.includes('does not exist') ||
+    mensaje.includes('could not find') ||
+    mensaje.includes('in the cache')
+  );
+}
+
 async function upsertArbolesConFallback(registros) {
   const payload = registros.map(limpiarArbol);
   const { error } = await supabase.from('arboles').upsert(payload, { onConflict: 'client_id' });
 
   if (!error) return { ok: true };
 
-  const mensaje = error.message || '';
-  if (mensaje.includes('column') && mensaje.includes('does not exist')) {
-    const { error: errorFallback } = await supabase.from('arboles').upsert(
-      payload.map(({ foto_arbol_entero, foto_hoja, foto_corteza, tipo_inventario, ...rest }) => rest),
-      { onConflict: 'client_id' }
-    );
+  if (debeHacerFallback(error)) {
+    const payloadFallback = payload.map((registro) => {
+      const {
+        foto_arbol_entero,
+        foto_hoja,
+        foto_corteza,
+        tipo_inventario,
+        estado_fitosanitario,
+        riesgo,
+        precision_m,
+        medido_en,
+        ...rest
+      } = registro;
+      return rest;
+    });
+
+    const { error: errorFallback } = await supabase.from('arboles').upsert(payloadFallback, { onConflict: 'client_id' });
     if (errorFallback) throw errorFallback;
     return { ok: true, fallback: true };
   }
