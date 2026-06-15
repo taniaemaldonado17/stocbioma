@@ -120,22 +120,43 @@ export default function VistaParcela({ parcela, arboles, onArbolGuardado, onVolv
           {arboles.length > 0 && (
             <ul className="divide-y divide-zinc-100 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-zinc-100">
               {arboles.map((a, i) => (
-                <li key={a.client_id} className="flex items-center justify-between p-4">
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-zinc-900">
-                      #{i + 1} · {a.especie || 'Sin especie'}
-                    </p>
-                    <p className="mt-0.5 text-xs text-zinc-400">
-                      {a.tipo_inventario === 'urbano' ? 'Urbano' : 'Forestal'} · DAP {a.dap_cm ?? '—'} cm · HT {a.ht_m ?? '—'} m · {a.estado_fitosanitario}
-                    </p>
+                <li key={a.client_id} className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-zinc-900">
+                        #{i + 1} · {a.especie || 'Sin especie'}
+                      </p>
+                      <p className="mt-0.5 text-xs text-zinc-400">
+                        {a.tipo_inventario === 'urbano' ? 'Urbano' : 'Forestal'} · DAP {a.dap_cm ?? '—'} cm · HT {a.ht_m ?? '—'} m · {a.estado_fitosanitario}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        a.synced ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
+                      }`}
+                    >
+                      {a.synced ? 'Sincr.' : 'Pend.'}
+                    </span>
                   </div>
-                  <span
-                    className={`ml-3 shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                      a.synced ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
-                    }`}
-                  >
-                    {a.synced ? 'Sincr.' : 'Pend.'}
-                  </span>
+                  {(a.foto_arbol_entero || a.foto_hoja || a.foto_corteza) && (
+                    <div className="mt-3 grid grid-cols-3 gap-2">
+                      {a.foto_arbol_entero && (
+                        <a href={a.foto_arbol_entero} target="_blank" rel="noreferrer">
+                          <img src={a.foto_arbol_entero} alt="Árbol entero" className="h-20 w-full rounded-xl object-cover" />
+                        </a>
+                      )}
+                      {a.foto_hoja && (
+                        <a href={a.foto_hoja} target="_blank" rel="noreferrer">
+                          <img src={a.foto_hoja} alt="Hoja" className="h-20 w-full rounded-xl object-cover" />
+                        </a>
+                      )}
+                      {a.foto_corteza && (
+                        <a href={a.foto_corteza} target="_blank" rel="noreferrer">
+                          <img src={a.foto_corteza} alt="Corteza" className="h-20 w-full rounded-xl object-cover" />
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

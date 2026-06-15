@@ -13,7 +13,7 @@ export function obtenerPosicion() {
           precision_m: pos.coords.accuracy ? Number(pos.coords.accuracy.toFixed(1)) : null
         }),
       (err) => reject(new Error('No se pudo obtener el GPS: ' + err.message)),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 10000 }
     );
   });
 }

@@ -130,6 +130,10 @@ export default function FormArbol({ parcela, numeroSiguiente, onGuardado }) {
             urls[tipo] = publicData?.publicUrl ?? null;
             continue;
           }
+
+          if (error) {
+            console.warn(`No se pudo subir ${tipo} a storage:`, error.message);
+          }
         }
       } catch (error) {
         console.warn(`No se pudo subir ${tipo}:`, error);
@@ -266,6 +270,9 @@ export default function FormArbol({ parcela, numeroSiguiente, onGuardado }) {
         <FotoInput etiqueta="Foto hoja" valor={fotos.hoja} onChange={subirFoto('hoja')} />
         <FotoInput etiqueta="Foto corteza" valor={fotos.corteza} onChange={subirFoto('corteza')} />
       </div>
+      <p className="mb-4 text-xs text-zinc-400">
+        Si la foto no se sube a Supabase Storage, se conserva como vista previa local para que no se rompa el registro.
+      </p>
 
       {/* Notas */}
       <label className="mb-6 block">
