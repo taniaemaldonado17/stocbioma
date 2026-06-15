@@ -92,7 +92,8 @@ export default function FormArbol({ parcela, numeroSiguiente, onGuardado }) {
       setGps(pos);
       setGpsEstado(`Precisión ±${pos.precision_m ?? '?'} m`);
     } catch (e) {
-      setGpsEstado(e.message);
+      setGps(null);
+      setGpsEstado(e.message || 'No se pudo obtener la ubicación');
     }
   };
 
@@ -101,7 +102,6 @@ export default function FormArbol({ parcela, numeroSiguiente, onGuardado }) {
   const num = (v) => (v === '' || isNaN(Number(v)) ? null : Number(v));
 
   const guardar = async () => {
-    if (!gps) return alert('Esperá a que el GPS capture la posición del árbol.');
     if (f.dap_cm === '') return alert('El DAP es obligatorio.');
     setGuardando(true);
 
@@ -138,34 +138,39 @@ export default function FormArbol({ parcela, numeroSiguiente, onGuardado }) {
       urls[tipo] = fotos[tipo] || null;
     }
 
-    await guardarArbol({
-      client_id: clientId,
-      parcela_client_id: parcela.client_id,
-      especie: f.especie.trim() || null,
-      dap_cm: num(f.dap_cm),
-      ht_m: num(f.ht_m),
-      hf_m: num(f.hf_m),
-      dc_m: num(f.dc_m),
-      tipo_inventario: f.tipo_inventario,
-      estado_fitosanitario: f.estado_fitosanitario,
-      riesgo: f.riesgo,
-      notas: f.notas.trim() || null,
-      foto_arbol_entero: urls.entero || null,
-      foto_hoja: urls.hoja || null,
-      foto_corteza: urls.corteza || null,
-      latitud: gps.latitud,
-      longitud: gps.longitud,
-      precision_m: gps.precision_m,
-      medido_en: new Date().toISOString(),
-      synced: false
-    });
-    setF(VACIO);
-    setFotos({ entero: '', hoja: '', corteza: '' });
-    setFotosArchivos({ entero: null, hoja: null, corteza: null });
-    setGuardando(false);
-    capturarGps();
-    onGuardado();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    try {
+      await guardarArbol({
+        client_id: clientId,
+        parcela_client_id: parcela.client_id,
+        especie: f.especie.trim() || null,
+        dap_cm: num(f.dap_cm),
+        ht_m: num(f.ht_m),
+        hf_m: num(f.hf_m),
+        dc_m: num(f.dc_m),
+        tipo_inventario: f.tipo_inventario,
+        estado_fitosanitario: f.estado_fitosanitario,
+        riesgo: f.riesgo,
+        notas: f.notas.trim() || null,
+        foto_arbol_entero: urls.entero || null,
+        foto_hoja: urls.hoja || null,
+        foto_corteza: urls.corteza || null,
+        latitud: gps?.latitud ?? null,
+        longitud: gps?.longitud ?? null,
+        precision_m: gps?.precision_m ?? null,
+        medido_en: new Date().toISOString(),
+        synced: false
+      });
+      setF(VACIO);
+      setFotos({ entero: '', hoja: '', corteza: '' });
+      setFotosArchivos({ entero: null, hoja: null, corteza: null });
+      capturarGps();
+      onGuardado();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (error) {
+      alert('No se pudo guardar el árbol: ' + (error?.message || error));
+    } finally {
+      setGuardando(false);
+    }
   };
 
   return (

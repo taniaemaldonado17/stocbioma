@@ -22,7 +22,8 @@ export default function FormParcela({ onGuardada, onCancelar }) {
       setGps(pos);
       setGpsEstado(`Precisión ±${pos.precision_m ?? '?'} m`);
     } catch (e) {
-      setGpsEstado(e.message);
+      setGps(null);
+      setGpsEstado(e.message || 'No se pudo obtener la ubicación');
     }
   };
 
@@ -31,18 +32,23 @@ export default function FormParcela({ onGuardada, onCancelar }) {
   const guardar = async () => {
     if (!nombre.trim()) return alert('Poné un nombre a la parcela.');
     setGuardando(true);
-    const parcela = {
-      client_id: crypto.randomUUID(),
-      nombre: nombre.trim(),
-      descripcion: descripcion.trim() || null,
-      latitud: gps?.latitud ?? null,
-      longitud: gps?.longitud ?? null,
-      creado_en: new Date().toISOString(),
-      synced: false
-    };
-    await guardarParcela(parcela);
-    setGuardando(false);
-    onGuardada(parcela);
+    try {
+      const parcela = {
+        client_id: crypto.randomUUID(),
+        nombre: nombre.trim(),
+        descripcion: descripcion.trim() || null,
+        latitud: gps?.latitud ?? null,
+        longitud: gps?.longitud ?? null,
+        creado_en: new Date().toISOString(),
+        synced: false
+      };
+      await guardarParcela(parcela);
+      onGuardada(parcela);
+    } catch (error) {
+      alert('No se pudo guardar la parcela: ' + (error?.message || error));
+    } finally {
+      setGuardando(false);
+    }
   };
 
   return (

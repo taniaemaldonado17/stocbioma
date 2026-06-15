@@ -7,20 +7,22 @@
 // ============================================================
 
 const DB_NAME = 'stocbioma';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 function abrirDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
-      if (!db.objectStoreNames.contains('parcelas')) {
-        db.createObjectStore('parcelas', { keyPath: 'client_id' });
+      if (db.objectStoreNames.contains('parcelas')) {
+        db.deleteObjectStore('parcelas');
       }
-      if (!db.objectStoreNames.contains('arboles')) {
-        const st = db.createObjectStore('arboles', { keyPath: 'client_id' });
-        st.createIndex('por_parcela', 'parcela_client_id', { unique: false });
+      if (db.objectStoreNames.contains('arboles')) {
+        db.deleteObjectStore('arboles');
       }
+      db.createObjectStore('parcelas', { keyPath: 'client_id' });
+      const st = db.createObjectStore('arboles', { keyPath: 'client_id' });
+      st.createIndex('por_parcela', 'parcela_client_id', { unique: false });
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
