@@ -32,20 +32,30 @@ export async function sincronizar() {
 
   // 1) Parcelas primero (los árboles dependen de ellas)
   if (parcelas.length > 0) {
-    const { error } = await supabase
-      .from('parcelas')
-      .upsert(parcelas.map(limpiarParcela), { onConflict: 'client_id' });
-    if (error) return { ok: false, mensaje: `Error subiendo parcelas: ${error.message}` };
-    await marcarSincronizados('parcelas', parcelas);
+    try {
+      const { error } = await supabase
+        .from('parcelas')
+        .upsert(parcelas.map(limpiarParcela), { onConflict: 'client_id' });
+      if (error) throw error;
+      await marcarSincronizados('parcelas', parcelas);
+    } catch (error) {
+      console.error('Error subiendo parcelas', error);
+      return { ok: false, mensaje: `Error subiendo parcelas: ${error.message || 'sin detalle'}` };
+    }
   }
 
   // 2) Árboles en lote
   if (arboles.length > 0) {
-    const { error } = await supabase
-      .from('arboles')
-      .upsert(arboles.map(limpiarArbol), { onConflict: 'client_id' });
-    if (error) return { ok: false, mensaje: `Error subiendo árboles: ${error.message}` };
-    await marcarSincronizados('arboles', arboles);
+    try {
+      const { error } = await supabase
+        .from('arboles')
+        .upsert(arboles.map(limpiarArbol), { onConflict: 'client_id' });
+      if (error) throw error;
+      await marcarSincronizados('arboles', arboles);
+    } catch (error) {
+      console.error('Error subiendo árboles', error);
+      return { ok: false, mensaje: `Error subiendo árboles: ${error.message || 'sin detalle'}` };
+    }
   }
 
   const total = parcelas.length + arboles.length;

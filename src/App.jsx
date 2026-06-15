@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 import { listarParcelas, listarArboles, listarPendientes } from './lib/db';
 import { sincronizar } from './lib/sync';
 import BarraEstado from './components/BarraEstado';
@@ -17,6 +18,16 @@ export default function App() {
   const [msgSync, setMsgSync] = useState('');
   const [syncOk, setSyncOk] = useState(true);
   const [sincronizando, setSincronizando] = useState(false);
+  const [showUpdateBanner, setShowUpdateBanner] = useState(false);
+
+  const { needRefresh: [needRefresh, setNeedRefresh], updateServiceWorker } = useRegisterSW({
+    onRegisteredSW(swUrl, registration) {
+      console.log('Service worker registrado en', swUrl, registration);
+    },
+    onRegisterError(error) {
+      console.error('Error al registrar el service worker', error);
+    }
+  });
 
   const refrescar = useCallback(async () => {
     setParcelas(await listarParcelas());
@@ -47,6 +58,10 @@ export default function App() {
       setTimeout(() => setMsgSync(''), 5000);
     }
   }, [refrescar]);
+
+  useEffect(() => {
+    setShowUpdateBanner(needRefresh);
+  }, [needRefresh]);
 
   useEffect(() => {
     refrescar();
@@ -87,6 +102,32 @@ export default function App() {
             }`}
           >
             {msgSync}
+          </div>
+        </div>
+      )}
+
+      {showUpdateBanner && (
+        <div className="px-4 pt-3">
+          <div className="mx-auto flex max-w-xl flex-col gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 sm:flex-row sm:items-center sm:justify-between">
+            <span>Hay una actualización lista. Recargá la app para usar la versión nueva.</span>
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  updateServiceWorker(true);
+                  setNeedRefresh(false);
+                  setShowUpdateBanner(false);
+                }}
+                className="rounded-full bg-amber-600 px-3 py-1.5 text-white"
+              >
+                Actualizar
+              </button>
+              <button
+                onClick={() => setShowUpdateBanner(false)}
+                className="rounded-full bg-white px-3 py-1.5 text-amber-700"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -6,8 +6,9 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      // El service worker se actualiza solo cuando despliegas una nueva versión
+      // El service worker se actualiza de inmediato cuando hay una versión nueva.
       registerType: 'autoUpdate',
+      injectRegister: 'auto',
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png'],
 
       // ── manifest.json de StocBioma ──────────────────────────
@@ -35,6 +36,9 @@ export default defineConfig({
         // Con esto la app abre y funciona al 100% sin internet.
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: '/index.html',
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
         runtimeCaching: [
           {
             // Tiles del mapa: CacheFirst → si el ingeniero abrió el mapa
